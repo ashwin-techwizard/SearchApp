@@ -15,7 +15,7 @@ object SearchApp {
   }
 
   def indexer(path: String): Map[String, mutable.Set[String]] = {
-    val searchMap = mutable.Map[String, Set[String]]()
+    val searchMap = mutable.Map[String, mutable.Set[String]]()
     val fileList = getListOfFiles(path)
     fileList.foreach { file =>
       for (line <- Source.fromFile(file.getPath).getLines) {
@@ -28,6 +28,7 @@ object SearchApp {
         }
       }
     }
+
     println(s"${fileList.size} files indexed")
     searchMap.toMap
   }
@@ -36,7 +37,7 @@ object SearchApp {
     ((parts / base) * 100).toInt
   }
 
-  def search(text: String, searchMap: Map[String, Set[String]]): List[(String, Int)] = {
+  def search(text: String, searchMap: Map[String, mutable.Set[String]]): List[(String, Int)] = {
     val wordList = text.split("\\s")
     val total = wordList.size.toFloat
     wordList.flatMap { word =>
