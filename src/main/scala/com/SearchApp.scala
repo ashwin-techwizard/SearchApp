@@ -14,16 +14,16 @@ object SearchApp {
     file.listFiles.filter(_.isFile).toList
   }
 
-  def indexer(path: String): Map[String, Set[String]] = {
+  def indexer(path: String): Map[String, mutable.Set[String]] = {
     val searchMap = mutable.Map[String, Set[String]]()
     val fileList = getListOfFiles(path)
     fileList.foreach { file =>
       for (line <- Source.fromFile(file.getPath).getLines) {
         line.split("\\s").map(_.toLowerCase()).foreach { word =>
           if (searchMap.contains(word)) {
-            searchMap(word) = searchMap.get(word).get += file.getName
+            searchMap(word) = searchMap(word) += file.getName
           } else {
-            searchMap += (word -> Set(file.getName))
+            searchMap += (word -> mutable.Set(file.getName))
           }
         }
       }
@@ -39,11 +39,11 @@ object SearchApp {
   def search(text: String, searchMap: Map[String, Set[String]]): List[(String, Int)] = {
     val wordList = text.split("\\s")
     val total = wordList.size.toFloat
-    wordList.map { word =>
+    wordList.flatMap { word =>
       if (searchMap.contains(word.toLowerCase)) {
         searchMap(word.toLowerCase())
       } else None
-    }.flatten.groupBy(identity)
+    }.groupBy(identity)
       .map(t => (t._1, scorer(t._2.length.toFloat, total))).toList
       .sortBy(_._2).reverse.take(10)
   }
@@ -64,7 +64,7 @@ object SearchApp {
           break()
         }
         val hits = search(text, index)
-        if (hits.size == 0) {
+        if (hits.isEmpty) {
           println("no matches found")
         } else
           hits.foreach(results => println(s"${results._1} : ${results._2}%"))
