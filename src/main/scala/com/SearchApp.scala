@@ -38,14 +38,14 @@ object SearchApp {
   }
 
   def search(text: String, searchMap: Map[String, mutable.Set[String]]): List[(String, Int)] = {
-    val wordList = text.split("\\s")
+    val wordList = text.split("\\s").map(_.toLowerCase()).toSet
     val total = wordList.size.toFloat
     wordList.flatMap { word =>
-      if (searchMap.contains(word.toLowerCase)) {
-        searchMap(word.toLowerCase())
+      if (searchMap.contains(word)) {
+        searchMap(word)
       } else None
     }.groupBy(identity)
-      .map(t => (t._1, scorer(t._2.length.toFloat, total))).toList
+      .map(t => (t._1, scorer(t._2.size.toFloat, total))).toList
       .sortBy(_._2).reverse.take(10)
   }
 
